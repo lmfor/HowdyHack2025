@@ -6,6 +6,8 @@ from pydantic import BaseModel
 SQL_CREATE_ROOM = "INSERT INTO rooms (room_id, name) VALUES (?, ?) RETURNING room_id, name;"
 SQL_JOIN_ROOM = "INSERT INTO members (id, room_id, display_name) VALUES (?, ?, COALESCE(NULLIF(?, ''), 'Anonymous')) RETURNING id, room_id, display_name;"
 SQL_DEL_ROOM = "DELETE FROM rooms WHERE room_id = ?"
+SQL_GET_MESSAGES = "SELECT * FROM messages WHERE room_id = ?"
+
 async def createRoom(env, name):
     
     try:
@@ -32,7 +34,7 @@ async def delRoom(env, room_id):
     except Exception as e:
         return {"message": f"Room {room_id} NOT FOUND"}
     
-async def joinRoom(env, room_id, display_name):
+async def joinRoom(env, room_id, display_name, admin=False):
     try:
         import uuid
         member_id = str(uuid.uuid4())
@@ -41,5 +43,16 @@ async def joinRoom(env, room_id, display_name):
                 "member_id": f"{member_id}"}
     except Exception as e:
         return {"message": f"Error: {str(e)}"}
+    
+
+async def getMessages(env, room_id: str):
+    try:
+        res = await env.DB.prepare(SQL_GET_MESSAGES).bind(room_id).all()
+        # print(res.results)
+        return res.results
+    except Exception as e:
+        # print(e)
+        return {"Error": str(e)}
+    
 
 

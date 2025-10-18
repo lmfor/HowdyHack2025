@@ -2,8 +2,8 @@ from fastapi import status
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 
-SQL_SEND_MESSAGE = "INSERT INTO messages (room_id, member_id, content) VALUES (?, ?, ?) RETURNING id;"
 
+SQL_SEND_MESSAGE = "INSERT INTO messages (room_id, member_id, content) VALUES (?, ?, ?) RETURNING id;"
 
 async def sendMessage(env, room_id: str, member_id: str, content: str):
     try:
@@ -13,4 +13,5 @@ async def sendMessage(env, room_id: str, member_id: str, content: str):
         # print(f"Error: {str(e)}")
         return {"Error": str(e)}
     
+
     

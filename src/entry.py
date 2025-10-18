@@ -3,7 +3,6 @@ from fastapi import FastAPI, Request, HTTPException
 from pydantic import BaseModel
 
 
-
 class Default(WorkerEntrypoint):
     async def fetch(self, request):
         import asgi # type: ignore
@@ -19,12 +18,13 @@ async def root():
 
 class Room(BaseModel):
     name: str
-    
+
 @app.post("/room")
 async def create_room(room: Room, req: Request):
     env = req.scope["env"]
-    from room import createRoom
-    return await createRoom(env, room.name)
+    from room import createRoom, joinRoom
+    room_data = await createRoom(env, room.name)
+    return await joinRoom(env, room_data.room_id, "Professor", admin=True)
 
 
 @app.delete("/room/{room_id}")
@@ -53,5 +53,13 @@ async def send_message(payload: MessageRequest, room_id: str, req: Request):
     env = req.scope["env"]
     from members import sendMessage
     return await sendMessage(env, room_id, payload.member_id, payload.content)
+
+@app.get("/room/{room_id}/messages")
+async def get_messages(room_id: str, req: Request):
+    env = req.scope["env"]
+    from room import getMessages
+    messages = await getMessages(env, room_id)
+    print(messages.to_py())
+    return messages.to_py()
 
 
