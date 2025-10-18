@@ -24,7 +24,8 @@ async def create_room(room: Room, req: Request):
     env = req.scope["env"]
     from room import createRoom, joinRoom
     room_data = await createRoom(env, room.name)
-    return await joinRoom(env, room_data.room_id, "Professor", admin=True)
+    print(room_data)
+    return await joinRoom(env, room_data['room_id'], "Professor", True)
 
 
 @app.delete("/room/{room_id}")
@@ -54,12 +55,18 @@ async def send_message(payload: MessageRequest, room_id: str, req: Request):
     from members import sendMessage
     return await sendMessage(env, room_id, payload.member_id, payload.content)
 
-@app.get("/room/{room_id}/messages")
-async def get_messages(room_id: str, req: Request):
+class GetMessageRequest(BaseModel):
+    member_id: str
+
+@app.post("/room/{room_id}/history")
+async def get_messages(room_id: str, payload:GetMessageRequest, req: Request):
     env = req.scope["env"]
     from room import getMessages
-    messages = await getMessages(env, room_id)
-    print(messages.to_py())
-    return messages.to_py()
+    messages = await getMessages(env, room_id, payload.member_id)
+    # print(messages.to_py())
+    try:
+        return messages.to_py()
+    except:
+        return messages
 
 
