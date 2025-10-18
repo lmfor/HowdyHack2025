@@ -8,3 +8,7 @@ wheels/
 
 # Virtual environments
 .venv
+
+# dependency directories
+node_modules/
+python_modules/

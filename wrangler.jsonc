@@ -8,22 +8,31 @@
 	"main": "src/entry.py",
 	"compatibility_date": "2025-10-11",
 	"compatibility_flags": [
+		"python_dedicated_snapshot",
 		"python_workers"
 	],
 	"observability": {
 		"enabled": true
-	}
+	},
+	"d1_databases": [
+		{
+			"binding": "DB",
+			"database_name":"room-data",
+			"database_id":"e1261242-fc35-4e95-afa8-fa744d5c6736"
+
+		}
+	]
 	/**
 	 * Smart Placement
 	 * Docs: https://developers.cloudflare.com/workers/configuration/smart-placement/#smart-placement
 	 */
 	// "placement": { "mode": "smart" }
-	/**
+	/*
 	 * Bindings
 	 * Bindings allow your Worker to interact with resources on the Cloudflare Developer Platform, including
 	 * databases, object storage, AI inference, real-time communication and more.
 	 * https://developers.cloudflare.com/workers/runtime-apis/bindings/
-	 */
+	 
 	/**
 	 * Environment Variables
 	 * https://developers.cloudflare.com/workers/wrangler/configuration/#environment-variables
