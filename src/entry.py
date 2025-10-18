@@ -27,12 +27,14 @@ async def create_room(room: Room, req: Request):
     print(room_data)
     return await joinRoom(env, room_data['room_id'], "Professor", True)
 
+class DeleteRequest(BaseModel):
+    member_id:str
 
 @app.delete("/room/{room_id}")
-async def delete_room(room_id: str, req: Request):
+async def delete_room(room_id: str, payload:DeleteRequest, req: Request):
     env = req.scope["env"]
     from room import delRoom
-    return await delRoom(env, room_id)
+    return await delRoom(env, room_id, payload.member_id)
 
 class JoinRequest(BaseModel):
     display_name: str

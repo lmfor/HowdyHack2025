@@ -3,7 +3,6 @@ from fastapi import status
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 
-
 SQL_CREATE_ROOM = "INSERT INTO rooms (room_id, name) VALUES (?, ?) RETURNING room_id, name;"
 SQL_JOIN_ROOM = "INSERT INTO members (id, room_id, display_name) VALUES (?, ?, COALESCE(NULLIF(?, ''), 'Anonymous')) RETURNING id, room_id, display_name;"
 SQL_JOIN_ROOM_ADMIN = "UPDATE rooms SET host_id = ? WHERE room_id = ?;"
@@ -24,8 +23,8 @@ async def getRelevantMessages(env, room_id:str, member_id:str):
     admin_id = admin_res.results.to_py()[0]['host_id']
     # print(admin_id)
 
-    self_res = await env.DB.prepare(SQL_GET_RELEVANT_MESSAGES).bind(room_id, member_id, admin_id)
-    return self_res.results
+    self_res = await env.DB.prepare(SQL_GET_RELEVANT_MESSAGES).bind(room_id, member_id, admin_id).all()
+    return self_res
 
 
 
@@ -47,11 +46,13 @@ async def createRoom(env, name):
     return {"room_id": room_id, 
             "name": name}
 
-async def delRoom(env, room_id):
+async def delRoom(env, room_id:str, member_id:str):
     try:
         # print("Hello world.", room_id)
-        res = await env.DB.prepare(SQL_DEL_ROOM).bind(room_id).all()
-        return {"message": f"Room {room_id} deleted."}
+        if (await isAdmin(env, room_id, member_id)):
+            res = await env.DB.prepare(SQL_DEL_ROOM).bind(room_id).all()
+            return {"message": f"Room {room_id} deleted."}
+        
     except Exception as e:
         return {"message": f"Room {room_id} NOT FOUND"}
     
@@ -78,7 +79,9 @@ async def getMessages(env, room_id: str, member_id : str):
         # comment in the functions
         
         # print(res.results)
-        return await getRelevantMessages(env,room_id, member_id)
+        relevant_results = await getRelevantMessages(env,room_id, member_id)
+        return relevant_results.results
+                                                     
         
     except Exception as e:
         # print(e)
